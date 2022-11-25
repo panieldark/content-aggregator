@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$/gemini" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/highlands-talent-group" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/htg-next" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/infrastructure" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/nextjs-blog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
   </component>
 </project>
