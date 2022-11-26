@@ -21,6 +21,7 @@ export class PostResolver {
         @Arg("title", () => String) title: string,
         @Ctx() {em}: MyContext
     ): Promise<Post> {
+        // @ts-ignore
         const post = em.create(Post, {title});
         await(em.persistAndFlush(post));
         return post;
