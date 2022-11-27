@@ -15,6 +15,8 @@ const user_1 = require("./resolvers/user");
 const redis_1 = __importDefault(require("redis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
+const constants_1 = require("./constants");
+const cors_1 = __importDefault(require("cors"));
 const main = async () => {
     const orm = await core_1.MikroORM.init(mikro_orm_config_1.default);
     await orm.getMigrator().up();
@@ -22,6 +24,10 @@ const main = async () => {
     const app = (0, express_1.default)();
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
     const redisClient = redis_1.default.createClient();
+    app.use((0, cors_1.default)({
+        origin: "http://localhost:3000",
+        credentials: true
+    }));
     app.use((0, express_session_1.default)({
         name: 'qid',
         store: new RedisStore({
@@ -31,8 +37,8 @@ const main = async () => {
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
             httpOnly: true,
-            sameSite: "none",
-            secure: true,
+            sameSite: "lax",
+            secure: constants_1.__prod__,
         },
         proxy: true,
         saveUninitialized: false,
@@ -47,8 +53,7 @@ const main = async () => {
         context: ({ req, res }) => ({ em: fork, req, res })
     });
     await apolloServer.start();
-    const cors = { credentials: true, origin: 'https://studio.apollographql.com' };
-    apolloServer.applyMiddleware({ app, cors });
+    apolloServer.applyMiddleware({ app, cors: false });
     app.listen(4000, () => {
         console.log("Server started on localhost:4000");
     });

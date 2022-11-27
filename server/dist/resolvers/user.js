@@ -75,7 +75,7 @@ let UserResolver = class UserResolver {
         if (options.username.length <= 2) {
             return {
                 errors: [{
-                        field: "Username",
+                        field: "username",
                         message: "Must be greater than 2"
                     }]
             };
@@ -83,21 +83,35 @@ let UserResolver = class UserResolver {
         if (options.password.length <= 3) {
             return {
                 errors: [{
-                        field: "Password",
+                        field: "password",
                         message: "Must be greater than 3"
                     }]
             };
         }
         const hashedPassword = await argon2_1.default.hash(options.password);
-        const user = em.create(User_1.User, { username: options.username, password: hashedPassword });
+        let user;
         try {
-            await em.persistAndFlush(user);
+            console.log("Up in here");
+            const result = await em
+                .createQueryBuilder(User_1.User)
+                .getKnexQuery()
+                .insert({
+                username: options.username,
+                password: hashedPassword,
+                created_at: new Date(),
+                updated_at: new Date()
+            }).returning("*");
+            console.log("RESULT", result);
+            const repo = em.getRepository(User_1.User);
+            user = repo.map(result[0]);
         }
         catch (err) {
+            console.log("WTF");
+            console.log(err);
             if (err.code === '23505') {
                 return {
                     errors: [{
-                            field: "Username",
+                            field: "username",
                             message: "That username's already taken!"
                         }]
                 };

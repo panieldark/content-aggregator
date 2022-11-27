@@ -1,7 +1,9 @@
 import {Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver} from "type-graphql";
 import {MyContext} from "../types";
 import {User} from "../entities/User";
-import argon2 from 'argon2';
+import argon2, {hash} from 'argon2';
+import {EntityManager} from "@mikro-orm/postgresql";
+
 @InputType()
 class UsernamePasswordInput {
     @Field()
@@ -52,7 +54,7 @@ export class UserResolver {
         if (options.username.length <= 2) {
             return {
                 errors: [{
-                    field: "Username",
+                    field: "username",
                     message: "Must be greater than 2"
                 }]
             }
@@ -60,21 +62,34 @@ export class UserResolver {
         if (options.password.length <= 3) {
             return {
                 errors: [{
-                    field: "Password",
+                    field: "password",
                     message: "Must be greater than 3"
                 }]
             }
         }
         const hashedPassword = await argon2.hash(options.password);
-        // @ts-ignore
-        const user = em.create(User, {username: options.username, password: hashedPassword});
+        let user;
         try {
-            await em.persistAndFlush(user);
+            console.log("Up in here")
+            const result = await (em as EntityManager)
+                .createQueryBuilder(User)
+                .getKnexQuery()
+                .insert({
+                username: options.username,
+                password: hashedPassword,
+                created_at: new Date(),
+                updated_at: new Date()
+            }).returning("*");
+            console.log("RESULT", result)
+            const repo = em.getRepository(User);
+            user = repo.map(result[0]);
         } catch (err) {
+            console.log("WTF")
+            console.log(err)
             if (err.code === '23505') {
                 return  {
                     errors: [{
-                        field: "Username",
+                        field: "username",
                         message: "That username's already taken!"
                     }]
                 }
