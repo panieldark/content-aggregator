@@ -4,9 +4,10 @@ import {useMeQuery} from "../generated/graphql";
 
 export const Navbar: React.FC<{}> = ({}) => {
     const [{data, fetching}] = useMeQuery()
+    console.log("data", data)
     let body = null;
     if (fetching) {}
-    else if (!data?.me) {
+    else if (!data?.me.user) {
         body = (<>
             <NextLink href={"/login"} legacyBehavior passHref>
                 <Link mr={2}>Login</Link>
@@ -26,7 +27,7 @@ export const Navbar: React.FC<{}> = ({}) => {
         )
     }
     return (
-        <Flex bg={'tomato'} p={4}>
+        <Flex bg={'tan'} p={4}>
             <Box ml={'auto'}>
                 {body}
             </Box>
